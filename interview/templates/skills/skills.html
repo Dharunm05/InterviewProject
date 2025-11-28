@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Skill Assessment | InterviewPrep AI</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      background: radial-gradient(circle at top, #e0f2fe, #f4f6fb);
+      min-height: 100vh;
+    }
+    .navbar-brand span {
+      font-weight: 700;
+    }
+    .page-container {
+      min-height: calc(100vh - 56px);
+      padding: 1.5rem 1rem;
+    }
+    .card {
+      border-radius: 1rem;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+      border: none;
+    }
+    .question-card {
+      border-radius: 1rem;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      padding: 1rem;
+      background: #ffffff;
+    }
+    .summary-box {
+      border-radius: 1rem;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      padding: 1rem;
+      background: #f9fafb;
+      white-space: pre-wrap;
+    }
+    .btn-pill {
+      border-radius: 999px;
+    }
+    .badge-soft {
+      background: rgba(59, 130, 246, 0.1);
+      color: #1d4ed8;
+      border-radius: 999px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .small-muted {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <span class="me-2">🧠</span><span>InterviewPrep AI</span>
+      </a>
+      <div class="d-flex gap-2">
+        <a href="/skills" class="btn btn-sm btn-outline-primary btn-pill">Skill Assessment</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container page-container">
+    <div class="row g-4">
+      <!-- LEFT: Filters + Mode selection -->
+      <div class="col-lg-4">
+        <div class="card p-3 mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">Search & Filters</h5>
+            <span class="badge-soft">Question Bank</span>
+          </div>
+          <div class="small-muted mb-2">
+            Filter by company, technology, difficulty, and mode.
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Search Text</label>
+            <input type="text" id="searchText" class="form-control form-control-sm" placeholder="binary search, HR, TCS aptitude" />
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Company</label>
+            <input type="text" id="company" class="form-control form-control-sm" placeholder="TCS, Infosys, Amazon..." />
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Technology / Topic</label>
+            <input type="text" id="tech" class="form-control form-control-sm" placeholder="DSA, SQL, OOPS, OS..." />
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Role (optional)</label>
+            <input type="text" id="role" class="form-control form-control-sm" placeholder="SDE, Analyst, Support..." />
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Difficulty</label>
+            <select id="difficulty" class="form-select form-select-sm">
+              <option value="">Any</option>
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Question Type</label>
+            <select id="questionType" class="form-select form-select-sm">
+              <option value="">Any</option>
+              <option value="MCQ">MCQ</option>
+              <option value="Theory">Theory</option>
+              <option value="HR">HR</option>
+            </select>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Number of Questions (Quiz mode)</label>
+            <select id="limit" class="form-select form-select-sm">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="15">15</option>
+            </select>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Mode</label>
+            <div class="d-flex gap-2">
+              <button type="button" id="btnModeQuiz" class="btn btn-sm btn-outline-primary btn-pill flex-fill active">
+                Quiz Mode
+              </button>
+              <button type="button" id="btnModeInterview" class="btn btn-sm btn-outline-secondary btn-pill flex-fill">
+                Interview Mode
+              </button>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2 mt-3">
+            <button type="button" id="btnGenerateQuestions" class="btn btn-primary btn-sm btn-pill">
+              ⚡ Generate Questions
+            </button>
+            <div class="small-muted text-center">
+              Mode is based on the button selection just above.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Quiz / Interview UI -->
+      <div class="col-lg-8">
+        <!-- QUIZ MODE -->
+        <div id="quizContainer" class="card p-3 mb-3" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <h5 class="mb-0">Quiz Mode (MCQ)</h5>
+              <span class="small-muted">One question at a time. Use Next / Previous and Submit Quiz.</span>
+            </div>
+            <div class="text-end small">
+              <div id="quizCounter">Q 0 / 0</div>
+              <div id="quizTimer">Time: 00:00</div>
+            </div>
+          </div>
+
+          <div id="quizQuestionArea">
+            <div class="question-card">
+              <div id="quizQuestionText" class="fw-semibold mb-2">
+                Click "Start Quiz" to load questions.
+              </div>
+              <div id="quizOptions"></div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between mt-3">
+            <div class="d-flex gap-2">
+              <button type="button" id="btnQuizPrev" class="btn btn-outline-secondary btn-sm btn-pill">
+                ⬅ Previous
+              </button>
+              <button type="button" id="btnQuizNext" class="btn btn-outline-secondary btn-sm btn-pill">
+                ➡ Next
+              </button>
+            </div>
+            <button type="button" id="btnQuizSubmit" class="btn btn-success btn-sm btn-pill">
+              ✔ Submit Quiz
+            </button>
+          </div>
+
+          <div id="quizSummary" class="summary-box mt-3" style="display:none;"></div>
+        </div>
+
+        <!-- INTERVIEW MODE -->
+        <div id="interviewContainer" class="card p-3" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <h5 class="mb-0">Interview Mode (Q&A)</h5>
+              <span class="small-muted">Answer subjective questions, then view sample answers & tips.</span>
+            </div>
+            <div class="text-end small">
+              <div id="interviewCounter">Q 0 / 0</div>
+            </div>
+          </div>
+
+          <div class="question-card mb-2">
+            <div id="interviewQuestionText" class="fw-semibold mb-2">
+              Click "Start Interview Practice" to load questions.
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Your Answer</label>
+            <textarea id="interviewAnswer" class="form-control" rows="4" placeholder="Type your answer here..."></textarea>
+          </div>
+
+          <div class="d-flex justify-content-between mt-3">
+            <div class="d-flex gap-2">
+              <button type="button" id="btnInterviewPrev" class="btn btn-outline-secondary btn-sm btn-pill">
+                ⬅ Previous
+              </button>
+              <button type="button" id="btnInterviewNext" class="btn btn-outline-secondary btn-sm btn-pill">
+                ➡ Next
+              </button>
+            </div>
+            <button type="button" id="btnInterviewSubmit" class="btn btn-success btn-sm btn-pill">
+              ✔ Submit Interview
+            </button>
+          </div>
+
+          <div id="interviewSummary" class="summary-box mt-3 small" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+  </script>
+
+  <script>
+    // ---------- MODE & FILTER STATE ----------
+    let currentMode = "quiz"; // "quiz" or "interview"
+
+    const btnModeQuiz = document.getElementById("btnModeQuiz");
+    const btnModeInterview = document.getElementById("btnModeInterview");
+    const btnGenerateQuestions = document.getElementById("btnGenerateQuestions");
+
+    const quizContainer = document.getElementById("quizContainer");
+    const interviewContainer = document.getElementById("interviewContainer");
+
+    function setMode(mode) {
+      currentMode = mode;
+      if (mode === "quiz") {
+        btnModeQuiz.classList.add("btn-outline-primary");
+        btnModeQuiz.classList.remove("btn-outline-secondary");
+        btnModeInterview.classList.add("btn-outline-secondary");
+        btnModeInterview.classList.remove("btn-outline-primary");
+        quizContainer.style.display = "block";
+        interviewContainer.style.display = "none";
+      } else {
+        btnModeInterview.classList.add("btn-outline-primary");
+        btnModeInterview.classList.remove("btn-outline-secondary");
+        btnModeQuiz.classList.add("btn-outline-secondary");
+        btnModeQuiz.classList.remove("btn-outline-primary");
+        quizContainer.style.display = "none";
+        interviewContainer.style.display = "block";
+      }
+    }
+
+    btnModeQuiz.addEventListener("click", () => setMode("quiz"));
+    btnModeInterview.addEventListener("click", () => setMode("interview"));
+    setMode("quiz");
+
+    // ---------- COMMON FILTERS ----------
+    const searchTextInput = document.getElementById("searchText");
+    const companyInput = document.getElementById("company");
+    const techInput = document.getElementById("tech");
+    const roleInput = document.getElementById("role");
+    const difficultyInput = document.getElementById("difficulty");
+    const questionTypeInput = document.getElementById("questionType");
+    const limitInput = document.getElementById("limit");
+
+    function buildRequestBody() {
+      return {
+        mode: currentMode,
+        company: companyInput.value.trim(),
+        technology: techInput.value.trim(),
+        role: roleInput.value.trim(),
+        difficulty: difficultyInput.value,
+        question_type: questionTypeInput.value,
+        num_questions: parseInt(limitInput.value, 10) || 5,
+        search_text: searchTextInput.value.trim(),
+      };
+    }
+
+    // ---------- QUIZ MODE ----------
+    let quizQuestions = [];
+    let quizIndex = 0;
+    let quizAnswers = {}; // id -> option index
+
+    const quizQuestionText = document.getElementById("quizQuestionText");
+    const quizOptionsDiv = document.getElementById("quizOptions");
+    const quizCounter = document.getElementById("quizCounter");
+    const quizTimer = document.getElementById("quizTimer");
+    const quizSummary = document.getElementById("quizSummary");
+
+    const btnQuizPrev = document.getElementById("btnQuizPrev");
+    const btnQuizNext = document.getElementById("btnQuizNext");
+    const btnQuizSubmit = document.getElementById("btnQuizSubmit");
+
+    let quizTimerInterval = null;
+    let quizSeconds = 0;
+
+    function startQuizTimer() {
+      clearInterval(quizTimerInterval);
+      quizSeconds = 0;
+      quizTimerInterval = setInterval(() => {
+        quizSeconds++;
+        const mins = String(Math.floor(quizSeconds / 60)).padStart(2, "0");
+        const secs = String(quizSeconds % 60).padStart(2, "0");
+        quizTimer.textContent = `Time: ${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function stopQuizTimer() {
+      clearInterval(quizTimerInterval);
+    }
+
+    function renderCurrentQuizQuestion() {
+      const q = quizQuestions[quizIndex];
+      if (!q) {
+        quizQuestionText.textContent = "Select filters and click Generate Questions to begin.";
+        quizOptionsDiv.innerHTML = "";
+        quizCounter.textContent = "Q 0 / 0";
+        return;
+      }
+
+      quizQuestionText.textContent = q.question || q.question_text || "Question unavailable.";
+      quizCounter.textContent = `Q ${quizIndex + 1} / ${quizQuestions.length}`;
+
+      const opts = q.options || [];
+      const selectedIdx = quizAnswers[q.id];
+      quizOptionsDiv.innerHTML = "";
+
+      opts.forEach((optText, idx) => {
+        const letter = String.fromCharCode(65 + idx);
+        const id = `quiz_opt_${q.id}_${idx}`;
+        const html = `
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="quizOptions" id="${id}" value="${idx}" ${selectedIdx === idx ? "checked" : ""}>
+            <label class="form-check-label" for="${id}">
+              <strong>${letter}.</strong> ${optText}
+            </label>
+          </div>
+        `;
+        quizOptionsDiv.insertAdjacentHTML("beforeend", html);
+      });
+
+      quizOptionsDiv.querySelectorAll('input[name="quizOptions"]').forEach(radio => {
+        radio.addEventListener("change", () => {
+          quizAnswers[q.id] = Number(radio.value);
+        });
+      });
+    }
+
+    btnQuizPrev.addEventListener("click", () => {
+      if (quizIndex > 0) {
+        quizIndex--;
+        renderCurrentQuizQuestion();
+      }
+    });
+
+    btnQuizNext.addEventListener("click", () => {
+      if (quizIndex < quizQuestions.length - 1) {
+        quizIndex++;
+        renderCurrentQuizQuestion();
+      }
+    });
+
+    btnQuizSubmit.addEventListener("click", async () => {
+      if (quizQuestions.length === 0) {
+        alert("Generate questions before submitting the quiz.");
+        return;
+      }
+
+      stopQuizTimer();
+      quizSummary.style.display = "block";
+      quizSummary.textContent = "Grading your answers...";
+
+      const answersPayload = quizQuestions.map(q => ({
+        id: q.id,
+        selected_option_index: quizAnswers[q.id] ?? null,
+      }));
+
+      const res = await fetch("/api/grade_quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers: answersPayload }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        quizSummary.textContent = data.error || "Unable to grade quiz.";
+        return;
+      }
+
+      let text = "";
+      text += `Score: ${data.score} / ${data.total}\n`;
+      text += `Accuracy: ${data.accuracy.toFixed(2)}%\n`;
+      text += "\nQuestion review:\n";
+      data.results.forEach((r, idx) => {
+        const letter = val => (val ?? val === 0 ? String.fromCharCode(65 + val) : "-");
+        text += `\nQ${idx + 1}: ${r.question}\n`;
+        text += `Your Answer: ${letter(r.selected_option_index)} | Correct: ${letter(r.correct_option_index)}\n`;
+        text += `Result: ${r.is_correct ? "✅ Correct" : "❌ Incorrect"}\n`;
+        if (r.explanation) {
+          text += `Explanation: ${r.explanation}\n`;
+        }
+      });
+      quizSummary.textContent = text;
+    });
+
+    // ---------- INTERVIEW MODE ----------
+    let interviewQuestions = [];
+    let interviewIndex = 0;
+    const interviewAnswers = {};
+
+    const interviewQuestionText = document.getElementById("interviewQuestionText");
+    const interviewAnswer = document.getElementById("interviewAnswer");
+    const interviewCounter = document.getElementById("interviewCounter");
+    const btnInterviewPrev = document.getElementById("btnInterviewPrev");
+    const btnInterviewNext = document.getElementById("btnInterviewNext");
+    const btnInterviewSubmit = document.getElementById("btnInterviewSubmit");
+    const interviewSummary = document.getElementById("interviewSummary");
+
+    function persistCurrentInterviewAnswer() {
+      const q = interviewQuestions[interviewIndex];
+      if (q) {
+        interviewAnswers[q.id] = interviewAnswer.value;
+      }
+    }
+
+    function renderCurrentInterviewQuestion() {
+      const q = interviewQuestions[interviewIndex];
+      if (!q) {
+        interviewQuestionText.textContent = "Select filters and click Generate Questions to begin.";
+        interviewCounter.textContent = "Q 0 / 0";
+        interviewAnswer.value = "";
+        return;
+      }
+      interviewQuestionText.textContent = q.question || "Question unavailable.";
+      interviewCounter.textContent = `Q ${interviewIndex + 1} / ${interviewQuestions.length}`;
+      interviewAnswer.value = interviewAnswers[q.id] || "";
+      interviewSummary.style.display = "none";
+      interviewSummary.textContent = "";
+    }
+
+    btnInterviewPrev.addEventListener("click", () => {
+      if (interviewIndex > 0) {
+        persistCurrentInterviewAnswer();
+        interviewIndex--;
+        renderCurrentInterviewQuestion();
+      }
+    });
+
+    btnInterviewNext.addEventListener("click", () => {
+      if (interviewIndex < interviewQuestions.length - 1) {
+        persistCurrentInterviewAnswer();
+        interviewIndex++;
+        renderCurrentInterviewQuestion();
+      }
+    });
+
+    interviewAnswer.addEventListener("input", () => {
+      const q = interviewQuestions[interviewIndex];
+      if (q) {
+        interviewAnswers[q.id] = interviewAnswer.value;
+      }
+    });
+
+    btnInterviewSubmit.addEventListener("click", async () => {
+      if (interviewQuestions.length === 0) {
+        alert("Generate questions before submitting answers.");
+        return;
+      }
+      persistCurrentInterviewAnswer();
+      interviewSummary.style.display = "block";
+      interviewSummary.textContent = "Sending answers for AI review...";
+
+      const answersPayload = interviewQuestions.map(q => ({
+        id: q.id,
+        answer: interviewAnswers[q.id] || "",
+      }));
+
+      const res = await fetch("/api/review_interview_answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers: answersPayload }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        interviewSummary.textContent = data.error || "Unable to review answers.";
+        return;
+      }
+
+      const evaluations = data.evaluations || [];
+      let text = `Reviewed ${evaluations.length} question(s).\n`;
+      evaluations.forEach(item => {
+        text += `\nQuestion ${item.id}:\n`;
+        text += `Rating: ${item.rating}/5 (${item.verdict})\n`;
+        text += `Feedback: ${item.feedback}\n`;
+        if (item.strengths && item.strengths.length) {
+          text += `Strengths: ${item.strengths.join("; ")}\n`;
+        }
+        if (item.improvements && item.improvements.length) {
+          text += `Improvements: ${item.improvements.join("; ")}\n`;
+        }
+      });
+      interviewSummary.textContent = text;
+    });
+
+    // ---------- GENERATION HANDLER ----------
+    async function generateQuestions() {
+      const body = buildRequestBody();
+      quizSummary.style.display = "none";
+      interviewSummary.style.display = "none";
+
+      if (currentMode === "quiz") {
+        quizQuestionText.textContent = "Generating questions with Gemini...";
+        quizOptionsDiv.innerHTML = "";
+        stopQuizTimer();
+      } else {
+        interviewQuestionText.textContent = "Generating questions with Gemini...";
+      }
+
+      btnGenerateQuestions.disabled = true;
+      btnGenerateQuestions.textContent = "Generating...";
+
+      try {
+        const res = await fetch("/api/generate_questions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to generate questions.");
+        }
+
+        if (currentMode === "quiz") {
+          quizQuestions = data.questions || [];
+          quizIndex = 0;
+          quizAnswers = {};
+          if (quizQuestions.length === 0) {
+            quizQuestionText.textContent = "Gemini returned no questions. Try different filters.";
+          } else {
+            renderCurrentQuizQuestion();
+            startQuizTimer();
+          }
+        } else {
+          interviewQuestions = data.questions || [];
+          interviewIndex = 0;
+          Object.keys(interviewAnswers).forEach(key => delete interviewAnswers[key]);
+          if (interviewQuestions.length === 0) {
+            interviewQuestionText.textContent = "Gemini returned no questions. Try different filters.";
+          } else {
+            renderCurrentInterviewQuestion();
+          }
+        }
+      } catch (err) {
+        if (currentMode === "quiz") {
+          quizQuestionText.textContent = err.message;
+        } else {
+          interviewQuestionText.textContent = err.message;
+        }
+      } finally {
+        btnGenerateQuestions.disabled = false;
+        btnGenerateQuestions.textContent = "⚡ Generate Questions";
+      }
+    }
+
+    btnGenerateQuestions.addEventListener("click", generateQuestions);
+  </script>
+</body>
+</html>

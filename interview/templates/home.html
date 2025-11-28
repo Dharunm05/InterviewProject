@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard | InterviewPrep AI</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      background: radial-gradient(circle at top, #e0f2fe, #f4f6fb);
+      min-height: 100vh;
+    }
+    .navbar-brand span {
+      font-weight: 700;
+    }
+    .page-container {
+      min-height: calc(100vh - 56px);
+      padding: 1.5rem 1rem;
+    }
+    .card {
+      border-radius: 1rem;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+      border: none;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .btn-pill {
+      border-radius: 999px;
+    }
+    .metric-card {
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    .metric-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #1d4ed8;
+    }
+    .metric-label {
+      font-size: 0.9rem;
+      color: #6b7280;
+      text-transform: uppercase;
+    }
+    .activity-item {
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      background: #ffffff;
+      margin-bottom: 0.5rem;
+      border-left: 4px solid #3b82f6;
+    }
+    .badge-soft {
+      background: rgba(59, 130, 246, 0.1);
+      color: #1d4ed8;
+      border-radius: 999px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .hero-section {
+      text-align: center;
+      padding: 3rem 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 1rem;
+      margin-bottom: 2rem;
+    }
+    .hero-section h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .hero-section p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <span class="me-2">🧠</span><span>InterviewPrep AI</span>
+      </a>
+      <div class="d-flex gap-2">
+        <a href="/resume" class="btn btn-sm btn-outline-secondary btn-pill">Resume Builder</a>
+        <a href="/interview-sim" class="btn btn-sm btn-outline-secondary btn-pill">Mock Interview</a>
+        <a href="/skills" class="btn btn-sm btn-outline-secondary btn-pill">Skill Assessment</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container page-container">
+    <!-- HERO SECTION -->
+    <div class="hero-section">
+      <h1>Welcome to InterviewPrep AI</h1>
+      <p>Your AI-powered companion for interview preparation. Build resumes, practice interviews, and assess skills.</p>
+      <div class="mt-3">
+        <a href="#features" class="btn btn-light btn-lg btn-pill">Get Started</a>
+      </div>
+    </div>
+
+    <!-- FEATURES CARDS -->
+    <div id="features" class="row g-4 mb-4">
+      <div class="col-md-4">
+        <div class="card metric-card">
+          <div class="card-body">
+            <div class="metric-value">📄</div>
+            <h5 class="card-title">Resume Builder</h5>
+            <p class="card-text">Create ATS-optimized resumes with AI assistance.</p>
+            <a href="/resume" class="btn btn-primary btn-pill">Build Resume</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card metric-card">
+          <div class="card-body">
+            <div class="metric-value">🎤</div>
+            <h5 class="card-title">Mock Interview</h5>
+            <p class="card-text">Practice video-call style interviews with AI feedback.</p>
+            <a href="/interview-sim" class="btn btn-primary btn-pill">Start Interview</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card metric-card">
+          <div class="card-body">
+            <div class="metric-value">🧠</div>
+            <h5 class="card-title">Skill Assessment</h5>
+            <p class="card-text">Take quizzes and practice questions tailored to your needs.</p>
+            <a href="/skills" class="btn btn-primary btn-pill">Assess Skills</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD SUMMARY -->
+    <div class="row g-4">
+      <!-- METRICS -->
+      <div class="col-lg-8">
+        <div class="card p-4">
+          <h5 class="card-title mb-3">Your Progress</h5>
+          <div class="row g-3" id="metricsContainer">
+            <!-- Metrics will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY & BADGES -->
+      <div class="col-lg-4">
+        <div class="card p-3 mb-3">
+          <h6 class="card-title">Recent Activity</h6>
+          <div id="activityContainer">
+            <!-- Activity will be loaded here -->
+          </div>
+        </div>
+        <div class="card p-3">
+          <h6 class="card-title">Achievements</h6>
+          <div id="badgesContainer">
+            <!-- Badges will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+  </script>
+
+  <script>
+    // Load dashboard summary
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/dashboard/summary');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Load metrics
+        const metrics = data.metrics || {};
+        const metricsContainer = document.getElementById('metricsContainer');
+        metricsContainer.innerHTML = `
+          <div class="col-md-4">
+            <div class="metric-card">
+              <div class="metric-value">${metrics.resume?.count || 0}</div>
+              <div class="metric-label">Resumes Built</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="metric-card">
+              <div class="metric-value">${metrics.interview?.last_overall?.toFixed(1) || 0}</div>
+              <div class="metric-label">Last Interview Score</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="metric-card">
+              <div class="metric-value">${metrics.quiz?.accuracy?.toFixed(0) || 0}%</div>
+              <div class="metric-label">Quiz Accuracy</div>
+            </div>
+          </div>
+        `;
+
+        // Load activity
+        const activity = data.activity || [];
+        const activityContainer = document.getElementById('activityContainer');
+        activityContainer.innerHTML = activity.map(act => `
+          <div class="activity-item">
+            <small class="text-muted">${act.timestamp}</small>
+            <div><strong>${act.title}</strong></div>
+            <div class="small">${act.details}</div>
+          </div>
+        `).join('');
+
+        // Load badges
+        const badges = data.badges || [];
+        const badgesContainer = document.getElementById('badgesContainer');
+        badgesContainer.innerHTML = badges.map(badge => `
+          <div class="badge-soft mb-2">
+            <strong>${badge.label}</strong><br>
+            <small>${badge.description}</small>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+      }
+    }
+
+    // Load on page load
+    loadDashboard();
+  </script>
+</body>
+</html>

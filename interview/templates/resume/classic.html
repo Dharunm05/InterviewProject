@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile.name }} - Resume</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: white;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .name {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .headline {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .contact {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .experience-item, .education-item, .project-item {
+            margin-bottom: 15px;
+        }
+        .job-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .company {
+            font-style: italic;
+            color: #666;
+        }
+        .dates {
+            font-size: 14px;
+            color: #666;
+        }
+        .bullets {
+            margin-left: 20px;
+        }
+        .bullet {
+            margin: 5px 0;
+        }
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .skill {
+            background: #f0f0f0;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="name">{{ profile.name }}</h1>
+        {% if profile.headline %}
+        <p class="headline">{{ profile.headline }}</p>
+        {% endif %}
+        <p class="contact">
+            {% if profile.contact %}{{ profile.contact }}{% endif %}
+            {% if profile.location %} | {{ profile.location }}{% endif %}
+            {% if profile.links.linkedin %} | {{ profile.links.linkedin }}{% endif %}
+            {% if profile.links.portfolio %} | {{ profile.links.portfolio }}{% endif %}
+        </p>
+    </div>
+
+    {% if profile.experience %}
+    <div class="section">
+        <h2 class="section-title">Experience</h2>
+        {% for exp in profile.experience %}
+        <div class="experience-item">
+            <div class="job-title">{{ exp.title }}</div>
+            <div class="company">{{ exp.company }}{% if exp.location %} - {{ exp.location }}{% endif %}</div>
+            <div class="dates">{{ exp.start_date }} - {{ exp.end_date }}</div>
+            <ul class="bullets">
+                {% for bullet in exp.bullets %}
+                <li class="bullet">{{ bullet }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if profile.projects %}
+    <div class="section">
+        <h2 class="section-title">Projects</h2>
+        {% for proj in profile.projects %}
+        <div class="project-item">
+            <div class="job-title">{{ proj.name }}</div>
+            {% if proj.tech_stack %}
+            <div class="company">{{ ', '.join(proj.tech_stack) }}</div>
+            {% endif %}
+            <ul class="bullets">
+                {% for bullet in proj.bullets %}
+                <li class="bullet">{{ bullet }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if profile.skills %}
+    <div class="section">
+        <h2 class="section-title">Skills</h2>
+        <div class="skills">
+            {% for skill in profile.skills %}
+            <span class="skill">{{ skill }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if profile.education %}
+    <div class="section">
+        <h2 class="section-title">Education</h2>
+        {% for edu in profile.education %}
+        <div class="education-item">
+            <div class="job-title">{{ edu.degree }}</div>
+            <div class="company">{{ edu.institution }}</div>
+            <div class="dates">{{ edu.start_year }} - {{ edu.end_year }}</div>
+            {% if edu.details %}
+            <p>{{ edu.details }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if profile.achievements %}
+    <div class="section">
+        <h2 class="section-title">Achievements</h2>
+        <ul class="bullets">
+            {% for ach in profile.achievements %}
+            <li class="bullet">{{ ach }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</body>
+</html>
